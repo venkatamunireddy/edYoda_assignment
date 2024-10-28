@@ -1,0 +1,61 @@
+Delete votepod
+vote-7d884dd585-8mzvb - currenty before deletion nthe vote pod is runniung with this container id now we are going to delete this pod.
+root@ip-172-31-34-4:~# kubectl delete po vote-7d884dd585-8mzvb
+pod "vote-7d884dd585-8mzvb" deleted
+the pod is deleted.
+no chnage the in the in worke the container id is changed from vote-7d884dd585-8mzvb to vote-7d884dd585-qqgw5 the reson behind this is replicaset creation.
+root@ip-172-31-34-4:~# kubectl get po
+NAME                      READY   STATUS    RESTARTS      AGE
+db-58cc845644-mqbd6       1/1     Running   0             34h
+redis-6878558678-dqrr2    1/1     Running   0             42h
+result-86bc6f7b5d-gwq6n   1/1     Running   1 (34h ago)   42h
+vote-7d884dd585-8mzvb     1/1     Running   0             34h
+worker-6fc5d5b668-k4bl2   1/1     Running   1 (34h ago)   34h
+
+After the deletion
+
+root@ip-172-31-34-4:~# kubectl get po
+NAME                      READY   STATUS    RESTARTS      AGE
+db-58cc845644-mqbd6       1/1     Running   0             35h
+redis-6878558678-dqrr2    1/1     Running   0             43h
+result-86bc6f7b5d-gwq6n   1/1     Running   1 (35h ago)   43h
+vote-7d884dd585-qqgw5     1/1     Running   0             2m51s
+worker-6fc5d5b668-k4bl2   1/1     Running   1 (35h ago)   35h
+root@ip-172-31-34-4:~#
+
+worker pod deletion:
+
+root@ip-172-31-34-4:~# kubectl delete po worker-6fc5d5b668-k4bl2
+pod "worker-6fc5d5b668-k4bl2" deleted
+
+root@ip-172-31-34-4:~# kubectl get po
+NAME                      READY   STATUS    RESTARTS      AGE
+db-58cc845644-mqbd6       1/1     Running   0             35h
+redis-6878558678-dqrr2    1/1     Running   0             43h
+result-86bc6f7b5d-gwq6n   1/1     Running   1 (35h ago)   43h
+vote-7d884dd585-qqgw5     1/1     Running   0             19m
+worker-6fc5d5b668-72rcs   1/1     Running   0             11m
+
+The function of worker pod is to  Processes votes from Redis and updates the final count. after using the delete worker pod command the pod will be deleted. as showing the above and it will be back to running state with zero down time beacause of the replica set that we created in the yaml file.
+the user will face any error while using the Application.
+
+DB pod deletion:
+
+the function of db pod is displays real-time voting results. postgreSQl Database
+
+root@ip-172-31-33-69:~# kubectl delete po db-58cc845644-mqbd6
+pod "db-58cc845644-mqbd6" deleted
+
+After the deletion
+
+Croot@ip-172-31-33-69:~# kubectl get pods
+NAME                      READY   STATUS    RESTARTS     AGE
+db-58cc845644-qckfr       1/1     Running   0            35s
+redis-6878558678-dqrr2    1/1     Running   0            2d22h
+result-86bc6f7b5d-gwq6n   1/1     Running   2 (5s ago)   2d22h
+vote-7d884dd585-qqgw5     1/1     Running   0            27h
+worker-6fc5d5b668-72rcs   1/1     Running   1 (5s ago)   27h
+root@ip-172-31-33-69:~#
+  if we above the after deleting both the result and worker pods are restarted but no change is their pod Name.
+  
+  as we deleted the db the the pod name changed from db-58cc845644-mqbd6 to worker-6fc5d5b668-72rcs
