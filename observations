@@ -1,0 +1,116 @@
+#Deleting a votePod in Kubernetes
+
+Before deletion of pod
+
+Pod Information:
+  Pod Name: vote-7d884dd585-8mzvb
+  Current Status: Running
+  Container ID: vote-7d884dd585-8mzvb
+root@ip-172-31-34-4:~# kubectl get po
+output:
+NAME                      READY   STATUS    RESTARTS      AGE
+db-58cc845644-mqbd6       1/1     Running   0             34h
+redis-6878558678-dqrr2    1/1     Running   0             42h
+result-86bc6f7b5d-gwq6n   1/1     Running   1 (34h ago)   42h
+vote-7d884dd585-8mzvb     1/1     Running   0             34h
+worker-6fc5d5b668-k4bl2   1/1     Running   1 (34h ago)   34h
+
+After the Deletion
+
+Delete the Pod
+    To delete the pod, run the following command:
+	  "kubectl delete po vote-7d884dd585-8mzvb"
+Output:
+	pod "vote-7d884dd585-8mzvb" deleted
+
+Verify the Current Pods
+
+To check the current status of the pods, use the following command:
+"kubectl get po"
+
+Output:
+NAME                      READY   STATUS    RESTARTS      AGE
+db-58cc845644-mqbd6       1/1     Running   0             34h
+redis-6878558678-dqrr2    1/1     Running   0             42h
+result-86bc6f7b5d-gwq6n   1/1     Running   1 (34h ago)   42h
+vote-7d884dd585-qqgw5     1/1     Running   0             0h
+worker-6fc5d5b668-k4bl2   1/1     Running   1 (34h ago)   34h
+Summary:
+  1.The original pod vote-7d884dd585-8mzvb was deleted successfully.
+  2.A new pod vote-7d884dd585-qqgw5 was created by the ReplicaSet to replace the deleted pod, maintaining the application's availability.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Worker Pod Deletion in Kubernetes
+
+Before pod deletion
+
+Pod Information:
+  Pod Name: worker-6fc5d5b668-k4bl2
+  Function: Processes votes from Redis and updates the final count.
+root@ip-172-31-34-4:~# kubectl get po
+output:
+NAME                      READY   STATUS    RESTARTS      AGE
+db-58cc845644-mqbd6       1/1     Running   0             34h
+redis-6878558678-dqrr2    1/1     Running   0             42h
+result-86bc6f7b5d-gwq6n   1/1     Running   1 (34h ago)   42h
+vote-7d884dd585-qqgw5    1/1      Running   0             34h
+worker-6fc5d5b668-k4bl2   1/1     Running   1 (34h ago)   34h
+
+After pod Deletion:
+
+Delete the Worker Pod
+ To delete the pod, run the following command:
+  "kubectl delete po worker-6fc5d5b668-k4bl2"
+Output:
+  pod "worker-6fc5d5b668-k4bl2" deleted
+
+Verify the Current Pods
+  "kubectl get po"
+output:
+NAME                      READY   STATUS    RESTARTS      AGE
+db-58cc845644-mqbd6       1/1     Running   0             35h
+redis-6878558678-dqrr2    1/1     Running   0             43h
+result-86bc6f7b5d-gwq6n   1/1     Running   1 (35h ago)   43h
+vote-7d884dd585-qqgw5     1/1     Running   0             19m
+worker-6fc5d5b668-72rcs   1/1     Running   0             11m
+
+Observations:
+  1.After the deletion of the worker pod, a new instance of the worker pod is created automatically by the ReplicaSet. This ensures that the application maintains its desired state with zero downtime.
+  2.The new worker pod will have a different name (worker-6fc5d5b668-72rcs), while the functionality remains unchanged.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#Deletion of DB Pod
+
+Pod Information:
+  Pod Name: db-58cc845644-mqbd6
+  Function: Displays real-time voting results (PostgreSQL Database)
+Before deletion of pod
+root@ip-172-31-34-4:~# kubectl get po
+output:
+NAME                      READY   STATUS    RESTARTS      AGE
+db-58cc845644-mqbd6       1/1     Running   0             35h
+redis-6878558678-dqrr2    1/1     Running   0             43h
+result-86bc6f7b5d-gwq6n   1/1     Running   1 (35h ago)   43h
+vote-7d884dd585-qqgw5     1/1     Running   0             19m
+worker-6fc5d5b668-72rcs   1/1     Running   0             11m
+
+After Delete the DB Pod
+use the command to delete
+  "kubectl delete po db-58cc845644-mqbd6"
+
+Verify the Current Pods
+  "kubectl get pods"
+
+output:
+NAME                      READY   STATUS    RESTARTS     AGE
+db-58cc845644-qckfr       1/1     Running   0            35s
+redis-6878558678-dqrr2    1/1     Running   0            2d22h
+result-86bc6f7b5d-gwq6n   1/1     Running   2 (5s ago)   2d22h
+vote-7d884dd585-qqgw5     1/1     Running   0            27h
+worker-6fc5d5b668-72rcs   1/1     Running   1 (5s ago)   27h
+Observations:
+  1.New DB Pod: The pod name changed from db-58cc845644-mqbd6 to db-58cc845644-qckfr, indicating that a new instance of the DB pod was created.
+  2.Restarted Pods: The result and worker pods have recorded restarts, but their names have not changed. This is normal behavior as these pods are separate deployments and can restart independently based on their configuration.
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+11. complete the assignment by making the result pod work. (if it is not working)
+In my node the worker pod is in running state, so again no need to make to any changes.
+if the pod is not deployed use the following command "kubectl apply -f podname.yaml".
